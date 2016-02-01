@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-YOUR HEADER COMMENT HERE
+SoftDes 2016 Mini Project 1: Gene Finder
 
-@author: YOUR NAME HERE
+@author: Oliver Steele
 
 """
 
 import random
+from itertools import takewhile
 from amino_acids import aa, codons, aa_table   # you may find these useful
 from load import load_seq
 
@@ -30,8 +31,11 @@ def get_complement(nucleotide):
     >>> get_complement('C')
     'G'
     """
-    # TODO: implement this
-    pass
+    complements = {}
+    for n1, n2 in [('A', 'T'), ('C', 'G')]:
+        complements[n1] = n2
+        complements[n2] = n1
+    return complements[nucleotide]
 
 
 def get_reverse_complement(dna):
@@ -45,8 +49,7 @@ def get_reverse_complement(dna):
     >>> get_reverse_complement("CCGCGTTCA")
     'TGAACGCGG'
     """
-    # TODO: implement this
-    pass
+    return ''.join(reversed([get_complement(n) for n in dna]))
 
 
 def rest_of_ORF(dna):
@@ -62,8 +65,9 @@ def rest_of_ORF(dna):
     >>> rest_of_ORF("ATGAGATAGG")
     'ATGAGA'
     """
-    # TODO: implement this
-    pass
+    stop_codons = ['TAG', 'TAA', 'TGA']
+    codons = [dna[i : i + 3] for i in range(0, len(dna), 3)]
+    return ''.join(takewhile(lambda codon: codon not in stop_codons, codons))
 
 
 def find_all_ORFs_oneframe(dna):
@@ -79,9 +83,17 @@ def find_all_ORFs_oneframe(dna):
     >>> find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCC")
     ['ATGCATGAATGTAGA', 'ATGTGCCC']
     """
-    # TODO: implement this
-    pass
-
+    i = 0
+    frames = []
+    start_codon = 'ATG'
+    while i < len(dna):
+        if dna[i:i + 3] == start_codon:
+            frame = rest_of_ORF(dna[i:])
+            frames.append(frame)
+            i += len(frame)
+        else:
+            i += 3
+    return frames
 
 def find_all_ORFs(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence in
@@ -95,9 +107,13 @@ def find_all_ORFs(dna):
 
     >>> find_all_ORFs("ATGCATGAATGTAG")
     ['ATGCATGAATGTAG', 'ATGAATGTAG', 'ATG']
+    >>> find_all_ORFs("ATGCA")
+    ['ATGCA']
     """
-    # TODO: implement this
-    pass
+    frames = []
+    for i in range(3):
+        frames.extend(find_all_ORFs_oneframe(dna[i:]))
+    return frames
 
 
 def find_all_ORFs_both_strands(dna):
@@ -109,8 +125,7 @@ def find_all_ORFs_both_strands(dna):
     >>> find_all_ORFs_both_strands("ATGCGAATGTAGCATCAAA")
     ['ATGCGAATG', 'ATGCTACATTCGCAT']
     """
-    # TODO: implement this
-    pass
+    return find_all_ORFs(dna) + find_all_ORFs(get_reverse_complement(dna))
 
 
 def longest_ORF(dna):
@@ -164,3 +179,4 @@ def gene_finder(dna):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    # doctest.run_docstring_examples(rest_of_ORF, globals())
