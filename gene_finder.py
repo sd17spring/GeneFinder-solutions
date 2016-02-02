@@ -8,8 +8,8 @@ SoftDes 2016 Mini Project 1: Gene Finder
 
 import random
 from itertools import takewhile
-from amino_acids import aa, codons, aa_table   # you may find these useful
-from load import load_seq
+from amino_acids import aa_table   # you may find these useful
+# from load import load_seq
 
 
 def shuffle_string(s):
@@ -66,7 +66,7 @@ def rest_of_ORF(dna):
     'ATGAGA'
     """
     stop_codons = ['TAG', 'TAA', 'TGA']
-    codons = [dna[i : i + 3] for i in range(0, len(dna), 3)]
+    codons = [dna[i:i + 3] for i in range(0, len(dna), 3)]
     return ''.join(takewhile(lambda codon: codon not in stop_codons, codons))
 
 
@@ -94,6 +94,7 @@ def find_all_ORFs_oneframe(dna):
         else:
             i += 3
     return frames
+
 
 def find_all_ORFs(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence in
@@ -138,6 +139,7 @@ def longest_ORF(dna):
     else:
         return None
 
+
 def longest_ORF_noncoding(dna, num_trials):
     """ Computes the maximum length of the longest ORF over num_trials shuffles
         of the specfied DNA sequence
@@ -166,6 +168,7 @@ def coding_strand_to_AA(dna):
         'MPA'
     """
     return ''.join(aa_table[dna[i:i + 3]] for i in xrange(0, len(dna) - 2, 3))
+
 
 def gene_finder(dna):
     """ Returns the amino acid sequences that are likely coded by the specified dna
