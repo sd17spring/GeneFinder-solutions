@@ -9,7 +9,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 import random
 from itertools import takewhile
 from amino_acids import aa_table   # you may find these useful
-# from load import load_seq
+from load import load_seq
 
 
 def shuffle_string(s):
@@ -182,10 +182,17 @@ def gene_finder(dna):
             if len(orf) > threshold]
 
 if __name__ == "__main__":
+    import sys
     import doctest
-    doctest.testmod()
-    # doctest.run_docstring_examples(gene_finder, globals())
 
-    # from load import load_seq
-    # dna = load_seq("./data/X73525.fa")
-    # print gene_finder(dna)
+    if sys.argv[1:]:
+        for arg in sys.argv[1:]:
+            if arg.endswith('.fa'):
+                dna = load_seq(arg)
+                print 'finding genes in %d-nucleotide strand in file {}...'.format(arg, len(dna))
+                print gene_finder(dna)
+            else:
+                print 'test', arg
+                doctest.run_docstring_examples(globals()[arg], globals())
+    else:
+        doctest.testmod()
