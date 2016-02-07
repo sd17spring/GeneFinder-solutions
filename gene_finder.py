@@ -20,6 +20,11 @@ def shuffle_string(s):
 
 # YOU WILL START YOUR IMPLEMENTATION FROM HERE DOWN ###
 
+# A dictionary {nucleotide: complement}
+nucleotide_complements = {}
+for n1, n2 in [('A', 'T'), ('C', 'G')]:
+    nucleotide_complements[n1] = n2
+    nucleotide_complements[n2] = n1
 
 def get_complement(nucleotide):
     """ Returns the complementary nucleotide
@@ -30,12 +35,12 @@ def get_complement(nucleotide):
     'T'
     >>> get_complement('C')
     'G'
+    >>> get_complement('T')
+    'A'
+    >>> get_complement('G')
+    'C'
     """
-    complements = {}
-    for n1, n2 in [('A', 'T'), ('C', 'G')]:
-        complements[n1] = n2
-        complements[n2] = n1
-    return complements[nucleotide]
+    return nucleotide_complements[nucleotide]
 
 
 def get_reverse_complement(dna):
@@ -64,6 +69,8 @@ def rest_of_ORF(dna):
     'ATG'
     >>> rest_of_ORF("ATGAGATAGG")
     'ATGAGA'
+    >>> rest_of_ORF("ATGAG") # return whole string, even to incomplete codon
+    'ATGAG'
     """
     stop_codons = ['TAG', 'TAA', 'TGA']
     codons = [dna[i:i + 3] for i in range(0, len(dna), 3)]
@@ -82,6 +89,10 @@ def find_all_ORFs_oneframe(dna):
         returns: a list of non-nested ORFs
     >>> find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCC")
     ['ATGCATGAATGTAGA', 'ATGTGCCC']
+    >>> find_all_ORFs_oneframe("AATGCATTAG") # non-aligned
+    []
+    >>> find_all_ORFs_oneframe("ATGATGTAGATGAAATAG") # nested
+    ['ATGATG', 'ATGAAA']
     """
     i = 0
     frames = []
@@ -129,13 +140,17 @@ def find_all_ORFs_both_strands(dna):
 def longest_ORF(dna):
     """ Finds the longest ORF on both strands of the specified DNA and returns it
         as a string
+    >>> longest_ORF("TAG") # no ORF
+    >>> longest_ORF("ATGCCCTGAATGTAG") # longest ORF is first
+    'ATGCCC'
+    >>> longest_ORF("ATGTAGATGCCCTGA") # longest ORF is second
+    'ATGCCC'
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
     """
     orfs = find_all_ORFs_both_strands(dna)
-    orfs.sort(key=len, reverse=True)
     if orfs:
-        return orfs[0]
+        return max(orfs, key=len)
     else:
         return None
 
@@ -189,7 +204,7 @@ if __name__ == "__main__":
         for arg in sys.argv[1:]:
             if arg.endswith('.fa'):
                 dna = load_seq(arg)
-                print 'finding genes in %d-nucleotide strand in file {}...'.format(arg, len(dna))
+                print 'Finding genes in {}-nucleotide strand in file {}...'.format(len(dna), arg)
                 print gene_finder(dna)
             else:
                 print 'test', arg
