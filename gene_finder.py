@@ -22,6 +22,9 @@ def shuffle_string(s):
 
 # A dictionary {nucleotide: complement}
 nucleotide_complements = {}
+
+# Initialize the dictionary. This is probably overkill for such a short dictionary:
+# `{'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}` would suffice.
 for n1, n2 in [('A', 'T'), ('C', 'G')]:
     nucleotide_complements[n1] = n2
     nucleotide_complements[n2] = n1
@@ -75,6 +78,10 @@ def rest_of_ORF(dna):
     stop_codons = ['TAG', 'TAA', 'TGA']
     codons = [dna[i:i + 3] for i in range(0, len(dna), 3)]
     return ''.join(takewhile(lambda codon: codon not in stop_codons, codons))
+    # equivalent to the last line:
+    #   def isnt_stop_codon(codon):
+    #     return codon not in stop_codons
+    #   return ''.join(takewhile(isnt_stop_codon, codons))
 
 
 def find_all_ORFs_oneframe(dna):
@@ -94,9 +101,9 @@ def find_all_ORFs_oneframe(dna):
     >>> find_all_ORFs_oneframe("ATGATGTAGATGAAATAG") # nested
     ['ATGATG', 'ATGAAA']
     """
-    i = 0
-    frames = []
     start_codon = 'ATG'
+    frames = []
+    i = 0
     while i < len(dna):
         if dna[i:i + 3] == start_codon:
             frame = rest_of_ORF(dna[i:])
