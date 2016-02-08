@@ -8,56 +8,59 @@ SoftDes 2016 Mini Project 1: Gene Finder
 
 from load import load_nitrogenase_seq, load_metagenome
 
-def make_substring_set_array(string):
-    """Return an array of sets of substrings of `string`, indexed by length.
-    This array is suitable as an input to `find_longest_substring_length`
+def make_substring_tree(string):
+    """Return a tree of substrings of string. The tree is represented as a rooted graph
+    whose nodes are dicts and whose keys are letters of the string.
 
     Examples:
-        >>> ar = make_substring_set_array('abc')
-        >>> len(ar)
-        4
-        >>> ar[0] == set([''])
-        True
-        >>> ar[1] == set(['a', 'b', 'c'])
-        True
-        >>> ar[2] == set(['ab', 'bc'])
-        True
-        >>> ar[3] == set(['abc'])
-        True
+        >>> make_substring_tree('abc')
+        {'a': {'b': {'c': {}}}, 'c': {}, 'b': {'c': {}}}
     """
-    return [set(string[i:i + n]
-            for i in xrange(len(string) + 1 - n))
-            for n in xrange(1 + len(string))]
+    def extend_graph(node, string):
+        for edge in string:
+            child = node.get(edge)
+            if not child:
+                node[edge] = child = {}
+            node = child
 
-def find_longest_substring_length(string, substring_set_array):
+    root = {}
+    for i in xrange(len(string)):
+        extend_graph(root, string[i:])
+    return root
+
+def find_longest_substring_length(string, substring_tree):
     """Return the length of the longest substring of `string` in `substring_set_array`,
     where `substring_set_array` is a value returned by `make_substring_set_array`.
 
     Examples:
-         >>> ar = make_substring_set_array('abc')
-         >>> find_longest_substring_length('xaz', ar)
-         1
-         >>> find_longest_substring_length('xabz', ar)
-         2
-         >>> find_longest_substring_length('xabcz', ar)
-         3
-         >>> find_longest_substring_length('xyabcz', ar)
-         3
-         >>> find_longest_substring_length('abcz', ar)
-         3
-         >>> find_longest_substring_length('xyabc', ar)
-         3
-         >>> find_longest_substring_length('xyz', ar)
-         0
+        >>> t = make_substring_tree('abc')
+        >>> find_longest_substring_length('xaz', t)
+        1
+        >>> find_longest_substring_length('xabz', t)
+        2
+        >>> find_longest_substring_length('xabcz', t)
+        3
+        >>> find_longest_substring_length('xyabcz', t)
+        3
+        >>> find_longest_substring_length('abcz', t)
+        3
+        >>> find_longest_substring_length('xyabc', t)
+        3
+        >>> find_longest_substring_length('xyz', t)
+        0
     """
 
-    # iterate over the possible substring lengths, in order from longest (length of the max
-    # of the string length and the longest item in the substring set array).
-    return next((n
-                 for n in xrange(min(len(string), len(substring_set_array) - 1), 0, -1)
-                 for i in xrange(len(string) + 1 - n)
-                 if string[i:i + n] in substring_set_array[n]),
-                0)
+    longest = 0
+    for i in xrange(len(string)):
+        if longest > len(string) - i + 1:
+            break
+        node = substring_tree
+        for j in xrange(i, len(string)):
+            node = node.get(string[j])
+            if node is None:
+                break
+            longest = max(longest, j + 1 - i)
+    return longest
 
 def find_snippet_with_greatest_overlap(target_sequence, snippets):
     """Return the name of the snippet whose sequence has the greatest overlap with `target_sequence`.
@@ -67,21 +70,21 @@ def find_snippet_with_greatest_overlap(target_sequence, snippets):
         target_sequence (str): the nucleotide sequence
 
     Examples:
+        >>> t = make_substring_tree('TAG')
         >>> snippets = [('1', 'AG'), ('2', 'AGAGAG'), ('3', 'ATAGA')]
         >>> find_snippet_with_greatest_overlap('TAG', snippets)
         '3'
         >>> find_snippet_with_greatest_overlap('AGAG', snippets)
         '2'
     """
-    target_array = make_substring_set_array(target_sequence)
-    snippet_name, _ = max(snippets, key=lambda snippet: find_longest_substring_length(snippet[1], target_array))
+    substring_tree = make_substring_tree(target_sequence)
+    snippet_name, _ = max(snippets, key=lambda snippet: find_longest_substring_length(snippet[1], substring_tree))
     return snippet_name
 
 
 def main():
     nitrogenase = load_nitrogenase_seq()
     metagenome = load_metagenome()
-    print 'len', len(metagenome)
     print find_snippet_with_greatest_overlap(nitrogenase, metagenome)
 
 
