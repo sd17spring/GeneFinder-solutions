@@ -7,8 +7,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 """
 
 import random
-from itertools import takewhile
-from amino_acids import aa_table   # you may find these useful
+import amino_acids   # you may find these useful
 from load import load_seq
 
 
@@ -30,13 +29,21 @@ def get_complement(nucleotide):
     'T'
     >>> get_complement('C')
     'G'
+    >>> get_complement('T')
+    'A'
+    >>> get_complement('G')
+    'C'
     """
-    complements = {}
-    for n1, n2 in [('A', 'T'), ('C', 'G')]:
-        complements[n1] = n2
-        complements[n2] = n1
-    return complements[nucleotide]
-
+    for complement_pair in [['A', 'T'], ['C', 'G']]:
+        n1 = complement_pair[0]
+        n2 = complement_pair[1]
+        if nucleotide == n1:
+            return n2
+        if nucleotide == n2:
+            return n1
+    1/0  #  raise an error, to make it instantly evident that something broke.
+    # The description of the error will be misleading, but the stack trace will take you to this line
+    # and also show who called the function.
 
 def get_reverse_complement(dna):
     """ Computes the reverse complementary sequence of DNA for the specfied DNA
@@ -49,8 +56,10 @@ def get_reverse_complement(dna):
     >>> get_reverse_complement("CCGCGTTCA")
     'TGAACGCGG'
     """
-    return ''.join(reversed([get_complement(n) for n in dna]))
-
+    complements = ''
+    for n in dna:
+        complements = get_complement(n) + complements
+    return complements
 
 def rest_of_ORF(dna):
     """ Takes a DNA sequence that is assumed to begin with a start
@@ -64,10 +73,17 @@ def rest_of_ORF(dna):
     'ATG'
     >>> rest_of_ORF("ATGAGATAGG")
     'ATGAGA'
+    >>> rest_of_ORF("ATGAG")
+    'ATGAG'
     """
     stop_codons = ['TAG', 'TAA', 'TGA']
-    codons = [dna[i:i + 3] for i in range(0, len(dna), 3)]
-    return ''.join(takewhile(lambda codon: codon not in stop_codons, codons))
+    sequence = ''
+    for i in range(0, len(dna), 3):
+        codon = dna[i:i + 3]
+        if codon in stop_codons:
+            break
+        sequence = sequence + codon
+    return sequence
 
 
 def find_all_ORFs_oneframe(dna):
@@ -111,7 +127,10 @@ def find_all_ORFs(dna):
     >>> find_all_ORFs("ATGCA")
     ['ATGCA']
     """
-    return [orf for i in xrange(3) for orf in find_all_ORFs_oneframe(dna[i:])]
+    orfs = []
+    for i in xrange(3):
+        orfs.extend(find_all_ORFs_oneframe(dna[i:]))
+    return orfs
 
 
 def find_all_ORFs_both_strands(dna):
@@ -150,7 +169,12 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-    return max(len(longest_ORF(shuffle_string(dna)) or '') for _ in xrange(num_trials))
+    max_len = 0
+    for _ in xrange(num_trials):
+        orf = longest_ORF(shuffle_string(dna))
+        if orf:
+            max_len = max(max_len, len(orf))
+    return max_len
 
 
 def coding_strand_to_AA(dna):
@@ -167,7 +191,16 @@ def coding_strand_to_AA(dna):
         >>> coding_strand_to_AA("ATGCCCGCTTT")
         'MPA'
     """
-    return ''.join(aa_table[dna[i:i + 3]] for i in xrange(0, len(dna) - 2, 3))
+    aa = ''
+    for i in xrange(0, len(dna) - 2, 3):
+        codon = dna[i:i + 3]
+        aa_index = None
+        for j in range(len(amino_acids.codons)):
+            if codon in amino_acids.codons[j]:
+                aa_index = j
+                break
+        aa = aa + amino_acids.aa[aa_index]
+    return aa
 
 
 def gene_finder(dna):
@@ -177,9 +210,11 @@ def gene_finder(dna):
         returns: a list of all amino acid sequences coded by the sequence dna.
     """
     threshold = longest_ORF_noncoding(dna, 1500)
-    return [coding_strand_to_AA(orf)
-            for orf in find_all_ORFs_both_strands(dna)
-            if len(orf) > threshold]
+    aas = []
+    for orf in find_all_ORFs_both_strands(dna):
+        if len(orf) > threshold:
+            aas.append(coding_strand_to_AA(orf))
+    return aas
 
 if __name__ == "__main__":
     import sys
@@ -189,7 +224,7 @@ if __name__ == "__main__":
         for arg in sys.argv[1:]:
             if arg.endswith('.fa'):
                 dna = load_seq(arg)
-                print 'finding genes in %d-nucleotide strand in file {}...'.format(arg, len(dna))
+                print 'Finding genes in {}-nucleotide strand in file {}...'.format(len(dna), arg)
                 print gene_finder(dna)
             else:
                 print 'test', arg
