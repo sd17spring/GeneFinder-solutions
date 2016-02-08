@@ -73,7 +73,7 @@ def rest_of_ORF(dna):
     'ATG'
     >>> rest_of_ORF("ATGAGATAGG")
     'ATGAGA'
-    >>> rest_of_ORF("ATGAG")
+    >>> rest_of_ORF("ATGAG") # return whole string, even to incomplete codon
     'ATGAG'
     """
     stop_codons = ['TAG', 'TAA', 'TGA']
@@ -98,6 +98,10 @@ def find_all_ORFs_oneframe(dna):
         returns: a list of non-nested ORFs
     >>> find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCC")
     ['ATGCATGAATGTAGA', 'ATGTGCCC']
+    >>> find_all_ORFs_oneframe("AATGCATTAG") # non-aligned
+    []
+    >>> find_all_ORFs_oneframe("ATGATGTAGATGAAATAG") # nested
+    ['ATGATG', 'ATGAAA']
     """
     i = 0
     frames = []
@@ -148,6 +152,11 @@ def find_all_ORFs_both_strands(dna):
 def longest_ORF(dna):
     """ Finds the longest ORF on both strands of the specified DNA and returns it
         as a string
+    >>> longest_ORF("TAG") # no ORF
+    >>> longest_ORF("ATGCCCTGAATGTAG") # longest ORF is first
+    'ATGCCC'
+    >>> longest_ORF("ATGTAGATGCCCTGA") # longest ORF is second
+    'ATGCCC'
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
     """
