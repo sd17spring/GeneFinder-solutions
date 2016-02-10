@@ -7,6 +7,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 """
 
 import random
+from multiprocessing import Pool
 import amino_acids   # you may find these useful
 from load import load_seq
 
@@ -178,12 +179,8 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-    max_len = 0
-    for _ in xrange(num_trials):
-        orf = longest_ORF(shuffle_string(dna))
-        if orf:
-            max_len = max(max_len, len(orf))
-    return max_len
+    p = Pool(10)
+    return max(len(orf or '') for orf in p.map(longest_ORF, (shuffle_string(dna) for _ in xrange(num_trials))))
 
 
 def coding_strand_to_AA(dna):
