@@ -6,6 +6,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 
 """
 
+from multiprocessing import Pool
 from load import load_nitrogenase_seq, load_metagenome
 
 def make_substring_tree(string):
@@ -62,6 +63,15 @@ def find_longest_substring_length(string, substring_tree):
             longest = max(longest, j + 1 - i)
     return longest
 
+
+def p_find_longest_substring_length(sequence):
+    """This is an adaptor to make `find_longest_substring_length` callable
+    by Pool().map, even though the substring tree is too deep to serialize.
+    """
+    global g_substring_tree
+    return find_longest_substring_length(sequence, g_substring_tree)
+
+
 def find_snippet_with_greatest_overlap(target_sequence, snippets):
     """Return the name of the snippet whose sequence has the greatest overlap with `target_sequence`.
 
@@ -77,9 +87,18 @@ def find_snippet_with_greatest_overlap(target_sequence, snippets):
         >>> find_snippet_with_greatest_overlap('AGAG', snippets)
         '2'
     """
-    substring_tree = make_substring_tree(target_sequence)
-    snippet_name, _ = max(snippets, key=lambda snippet: find_longest_substring_length(snippet[1], substring_tree))
-    return snippet_name
+    # Set a global variable to the target sequence *before* calling Pool().
+    # This insures that the value is present within each process that is forked from this one.
+    # This wouldn't work if this function were ever called with a different
+    # target_sequence, since then the child processes would already have the previous value.
+    global g_substring_tree
+    g_substring_tree = make_substring_tree(target_sequence)
+
+    p = Pool(12)
+    longest_substring_lengths = p.map(p_find_longest_substring_length, (snippet[1] for snippet in snippets))
+    max_index = longest_substring_lengths.index(max(longest_substring_lengths))
+    max_snippet = snippets[max_index]
+    return max_snippet[0]
 
 
 def main():
