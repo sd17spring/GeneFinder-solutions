@@ -14,7 +14,13 @@ from load import load_seq
 def shuffle_string(s):
     """Shuffles the characters in the input string
         NOTE: this is a helper function, you do not
-        have to modify this in any way """
+        have to modify this in any way.
+    >>> random.seed(1)
+    >>> shuffle_string('abcdef')
+    'aedfcb'
+    >>> shuffle_string('abcdef')
+    'dfaebc'
+    """
     return ''.join(random.sample(s, len(s)))
 
 # YOU WILL START YOUR IMPLEMENTATION FROM HERE DOWN ###
@@ -172,8 +178,9 @@ def longest_ORF_noncoding(dna, num_trials):
     """ Computes the maximum length of the longest ORF over num_trials shuffles
         of the specfied DNA sequence
 
-        >>> longest_ORF_noncoding("ATGCGAATGTAGCATCAAA", 100) > 10
-        True
+        >>> random.seed(1)
+        >>> longest_ORF_noncoding("ATGCGAATGTAGCATCAAA", 100)
+        19
 
         dna: a DNA sequence
         num_trials: the number of random shuffles
@@ -214,6 +221,12 @@ def coding_strand_to_AA(dna):
 
 def gene_finder(dna):
     """ Returns the amino acid sequences that are likely coded by the specified dna
+
+        >>> random.seed(1)
+        >>> gene_finder("ATGTCATTGCGTGTGAGACAGATTGATCGTCGCGAATGGCTATTGGCGCAAACCGCGACAGAATGCCAGCGCCATGGCCGGGAA" \
+                        "GCGACGCTGGAATATCCGACGCGACAGGGAATGTGGGTTCGGTTGAGCGATGCAGAAAAACGGTGGTCGGCCTGGATTAAACCT" \
+                        "GGGGACTGGCTTGAGCATGTCTCTCCCGCTCTGGCTGGGGCGGCGGTTTCTGCTGGCGCTGAGCACCTGGTCGTTCCCTGGCTT")
+        ['MSLRVRQIDRREWLLAQTATECQRHGREATLEYPTRQGMWVRLSDAEKRWSAWIKPGDWLEHVSPALAGAAVSAGAEHLVVPWL']
 
         dna: a DNA sequence
         returns: a list of all amino acid sequences coded by the sequence dna.
