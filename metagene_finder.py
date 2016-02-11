@@ -31,10 +31,21 @@ def find_longest_common_substring_length(s1, s2):
     longest_len = 0
     for i1 in xrange(len(s1)):
         for i2 in xrange(len(s2)):
-            offset = 0
-            while i1 + offset < len(s1) and i2 + offset < len(s2) and s1[i1 + offset] == s2[i2 + offset]:
-                offset += 1
-            longest_len = max(longest_len, offset)
+            # Test candidate substrings of different lengths. Don't bother testing substrings
+            # with length less than or equal `longest_len`, since finding one won't increase
+            # the length of the longest substring. The endpoint of the range is chosen to avoid
+            # running off the end of either s1 or s2.
+            #
+            # If we started with the *longest* possible substring length, we could break as soon as
+            # we find a match. But it's slower to compare longer strings, and in general strings
+            # will mismatch in the first few characters, so this approach would require both more
+            # iterations and more time per average iteration step, in general.
+            for substring_len in xrange(longest_len + 1, min(len(s1) + 1 - i1, len(s2) + 1 - i2)):
+                if s1[i1:i1 + substring_len] == s2[i2:i2 + substring_len]:
+                    longest_len = substring_len
+                else:
+                    # if the shorter substring doesn't match, making it longer won't going to help
+                    break
     return longest_len
 
 def find_snippet_with_greatest_overlap(target_sequence, snippets):
