@@ -9,8 +9,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 from load import load_nitrogenase_seq, load_metagenome
 
 def find_longest_common_substring_length(s1, s2):
-    """Return the length of the longest substring of `string` in `substring_set_array`,
-    where `substring_set_array` is a value returned by `make_substring_set_array`.
+    """Return the length of the greatest common substring of `s1` and `s2`.
 
     Examples:
          >>> find_longest_common_substring_length('abc', 'xaz')
@@ -44,21 +43,19 @@ def find_snippet_with_greatest_overlap(target_sequence, snippets):
         target_sequence (str): the nucleotide sequence
 
     Examples:
-        # >>> snippets = [('1', 'AG'), ('2', 'AGAGAG'), ('3', 'ATAGA')]
-        # >>> find_snippet_with_greatest_overlap('TAG', snippets)
-        # '3'
-        # >>> find_snippet_with_greatest_overlap('AGAG', snippets)
-        # '2'
+        >>> snippets = [('1', 'AG'), ('2', 'AGAGAG'), ('3', 'ATAGA')]
+        >>> find_snippet_with_greatest_overlap('TAG', snippets)
+        '3'
+        >>> find_snippet_with_greatest_overlap('AGAG', snippets)
+        '2'
     """
-    target_array = make_substring_set_array(target_sequence)
-    snippet_name, _ = max(snippets, key=lambda snippet: find_longest_common_substring_length(snippet[1], target_array))
+    snippet_name, _ = max(snippets, key=lambda snippet: find_longest_common_substring_length(snippet[1], target_sequence))
     return snippet_name
 
 
 def main():
     nitrogenase = load_nitrogenase_seq()
     metagenome = load_metagenome()
-    print 'len', len(metagenome)
     print find_snippet_with_greatest_overlap(nitrogenase, metagenome)
 
 
