@@ -9,8 +9,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 from load import load_nitrogenase_seq, load_metagenome
 
 def find_longest_common_substring_length(s1, s2):
-    """Return the length of the longest substring of `string` in `substring_set_array`,
-    where `substring_set_array` is a value returned by `make_substring_set_array`.
+    """Return the length of the longest common substring of `s1` and `s2`.
 
     Examples:
         >>> find_longest_common_substring_length('abc', 'xaz')
