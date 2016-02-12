@@ -20,14 +20,14 @@ def shuffle_string(s):
 
 # YOU WILL START YOUR IMPLEMENTATION FROM HERE DOWN ###
 
-# A dictionary {nucleotide: complement}
-nucleotide_complements = {}
+NUCLEOTIDE_COMPLEMENTS = {}
+"""A dict of {nucleotide: complement}"""
 
 # Initialize the dictionary. This is probably overkill for such a short dictionary:
 # `{'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}` would suffice.
 for n1, n2 in [('A', 'T'), ('C', 'G')]:
-    nucleotide_complements[n1] = n2
-    nucleotide_complements[n2] = n1
+    NUCLEOTIDE_COMPLEMENTS[n1] = n2
+    NUCLEOTIDE_COMPLEMENTS[n2] = n1
 
 def get_complement(nucleotide):
     """ Returns the complementary nucleotide
@@ -43,7 +43,7 @@ def get_complement(nucleotide):
     >>> get_complement('G')
     'C'
     """
-    return nucleotide_complements[nucleotide]
+    return NUCLEOTIDE_COMPLEMENTS[nucleotide]
 
 
 def get_reverse_complement(dna):
