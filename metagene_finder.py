@@ -6,6 +6,7 @@ SoftDes 2016 Mini Project 1: Gene Finder
 
 """
 
+from multiprocessing import Pool
 from load import load_nitrogenase_seq, load_metagenome
 
 def make_substring_tree(string):
@@ -62,6 +63,15 @@ def find_longest_substring_length(string, substring_tree):
             longest = max(longest, j + 1 - i)
     return longest
 
+
+def p_find_longest_substring_length(sequence):
+    """An adaptor that allows `Pool().map` to invoke `find_longest_substring_length`, even though
+    the second argument to `find_longest_substring_length` can't be pickled.
+    """
+    global g_substring_tree
+    return find_longest_substring_length(sequence, g_substring_tree)
+
+
 def find_snippet_with_greatest_overlap(target_sequence, snippets):
     """Return the name of the snippet whose sequence has the greatest overlap with `target_sequence`.
 
@@ -77,9 +87,22 @@ def find_snippet_with_greatest_overlap(target_sequence, snippets):
         >>> find_snippet_with_greatest_overlap('AGAG', snippets)
         '2'
     """
-    substring_tree = make_substring_tree(target_sequence)
-    snippet_name, _ = max(snippets, key=lambda snippet: find_longest_substring_length(snippet[1], substring_tree))
-    return snippet_name
+    # This is a hack to work around the fact that the substring tree is too deep to serialize.
+    # The global has to be assigned before `Pool()` forks the child processes.
+    # This only works because `find_snippet_with_greatest_overlap` is only called once per program invocation.
+    # One alternative implementation woud be to write a custom serializer for the substring tree.
+    # Another would be to pass `target_sequence` to each process instead, construct the substring tree within
+    # each process, and memoize the result.
+    global g_substring_tree
+    g_substring_tree = make_substring_tree(target_sequence)
+
+    # Compute the longest common substrings lengths, in parallel
+    p = Pool(10)
+    longest_substring_lengths = p.map(p_find_longest_substring_length, (snippet[1] for snippet in snippets))
+
+    max_index = longest_substring_lengths.index(max(longest_substring_lengths))
+    max_snippet = snippets[max_index]
+    return max_snippet[0]
 
 
 def main():
