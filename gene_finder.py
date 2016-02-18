@@ -179,7 +179,7 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-    p = Pool(10)
+    p = Pool()
     return max(len(orf or '') for orf in p.map(longest_ORF, (shuffle_string(dna) for _ in xrange(num_trials))))
 
 
