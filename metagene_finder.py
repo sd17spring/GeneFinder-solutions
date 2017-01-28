@@ -6,7 +6,8 @@ SoftDes 2016 Mini Project 1: Gene Finder
 
 """
 
-from load import load_nitrogenase_seq, load_metagenome
+from load import load_metagenome, load_nitrogenase_seq
+
 
 def find_longest_common_substring_length(s1, s2):
     """Return the length of the greatest common substring of `s1` and `s2`.
@@ -35,6 +36,7 @@ def find_longest_common_substring_length(s1, s2):
                 L[(i, j)] = 1 + L.get((i - 1, j - 1), 0)
     return max(L.values() or [0])
 
+
 def find_snippet_with_greatest_overlap(target_sequence, snippets):
     """Return the name of the snippet whose sequence has the greatest overlap with `target_sequence`.
 
@@ -56,7 +58,7 @@ def find_snippet_with_greatest_overlap(target_sequence, snippets):
 def main():
     nitrogenase = load_nitrogenase_seq()
     metagenome = load_metagenome()
-    print find_snippet_with_greatest_overlap(nitrogenase, metagenome)
+    print(find_snippet_with_greatest_overlap(nitrogenase, metagenome))
 
 
 if __name__ == "__main__":
