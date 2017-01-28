@@ -7,7 +7,9 @@ SoftDes 2016 Mini Project 1: Gene Finder
 """
 
 from multiprocessing import Pool
-from load import load_nitrogenase_seq, load_metagenome
+
+from load import load_metagenome, load_nitrogenase_seq
+
 
 def make_substring_tree(string):
     """Return a tree of substrings of string. The tree is represented as a rooted graph
@@ -25,9 +27,10 @@ def make_substring_tree(string):
             node = child
 
     root = {}
-    for i in xrange(len(string)):
+    for i in range(len(string)):
         extend_graph(root, string[i:])
     return root
+
 
 def find_longest_substring_length(string, substring_tree):
     """Return the length of the longest substring of `string` in `substring_set_array`,
@@ -52,11 +55,11 @@ def find_longest_substring_length(string, substring_tree):
     """
 
     longest = 0
-    for i in xrange(len(string)):
+    for i in range(len(string)):
         if longest > len(string) - i + 1:
             break
         node = substring_tree
-        for j in xrange(i, len(string)):
+        for j in range(i, len(string)):
             node = node.get(string[j])
             if node is None:
                 break
@@ -104,7 +107,7 @@ def find_snippet_with_greatest_overlap(target_sequence, snippets):
 def main():
     nitrogenase = load_nitrogenase_seq()
     metagenome = load_metagenome()
-    print find_snippet_with_greatest_overlap(nitrogenase, metagenome)
+    print(find_snippet_with_greatest_overlap(nitrogenase, metagenome))
 
 
 if __name__ == "__main__":
