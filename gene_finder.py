@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-SoftDes 2016 Mini Project 1: Gene Finder
+SoftDes 2017 Mini Project 1: Gene Finder
 
 @author: Oliver Steele
 
 """
 
 import random
-import amino_acids   # you may find these useful
+
+import amino_acids  # you may find these useful
 from load import load_seq
 
 
@@ -17,9 +18,9 @@ def shuffle_string(s):
         have to modify this in any way.
     >>> random.seed(1)
     >>> shuffle_string('abcdef')
-    'aedfcb'
+    'beafdc'
     >>> shuffle_string('abcdef')
-    'dfaebc'
+    'dfeacb'
     """
     return ''.join(random.sample(s, len(s)))
 
@@ -47,9 +48,10 @@ def get_complement(nucleotide):
             return n2
         if nucleotide == n2:
             return n1
-    1/0  #  raise an error, to make it instantly evident that something broke.
+    1 / 0  # raise an error, to make it instantly evident that something broke.
     # The description of the error will be misleading, but the stack trace will take you to this line
     # and also show who called the function.
+
 
 def get_reverse_complement(dna):
     """ Computes the reverse complementary sequence of DNA for the specfied DNA
@@ -66,6 +68,7 @@ def get_reverse_complement(dna):
     for n in dna:
         complements = get_complement(n) + complements
     return complements
+
 
 def rest_of_ORF(dna):
     """ Takes a DNA sequence that is assumed to begin with a start
@@ -138,7 +141,7 @@ def find_all_ORFs(dna):
     ['ATGCA']
     """
     orfs = []
-    for i in xrange(3):
+    for i in range(3):
         orfs.extend(find_all_ORFs_oneframe(dna[i:]))
     return orfs
 
@@ -186,9 +189,11 @@ def longest_ORF_noncoding(dna, num_trials):
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
     max_len = 0
-    for _ in xrange(num_trials):
+    for _ in range(num_trials):
         orf = longest_ORF(shuffle_string(dna))
         if orf:
+            # if len(orf) >= max_len:
+            #     print(len(orf), orf)
             max_len = max(max_len, len(orf))
     return max_len
 
@@ -208,7 +213,7 @@ def coding_strand_to_AA(dna):
         'MPA'
     """
     aa = ''
-    for i in xrange(0, len(dna) - 2, 3):
+    for i in range(0, len(dna) - 2, 3):
         codon = dna[i:i + 3]
         aa_index = None
         for j in range(len(amino_acids.codons)):
@@ -222,7 +227,7 @@ def coding_strand_to_AA(dna):
 def gene_finder(dna):
     """ Returns the amino acid sequences that are likely coded by the specified dna
 
-        >>> random.seed(1)
+        >>> random.seed(1) #, version=1)
         >>> gene_finder("ATGTCATTGCGTGTGAGACAGATTGATCGTCGCGAATGGCTATTGGCGCAAACCGCGACAGAATGCCAGCGCCATGGCCGGGAA" \
                         "GCGACGCTGGAATATCCGACGCGACAGGGAATGTGGGTTCGGTTGAGCGATGCAGAAAAACGGTGGTCGGCCTGGATTAAACCT" \
                         "GGGGACTGGCTTGAGCATGTCTCTCCCGCTCTGGCTGGGGCGGCGGTTTCTGCTGGCGCTGAGCACCTGGTCGTTCCCTGGCTT")
@@ -231,6 +236,7 @@ def gene_finder(dna):
         dna: a DNA sequence
         returns: a list of all amino acid sequences coded by the sequence dna.
     """
+    random.seed(1)
     threshold = longest_ORF_noncoding(dna, 1500)
     aas = []
     for orf in find_all_ORFs_both_strands(dna):
@@ -246,10 +252,10 @@ if __name__ == "__main__":
         for arg in sys.argv[1:]:
             if arg.endswith('.fa'):
                 dna = load_seq(arg)
-                print 'Finding genes in {}-nucleotide strand in file {}...'.format(len(dna), arg)
-                print gene_finder(dna)
+                print('Finding genes in {}-nucleotide strand in file {}...'.format(len(dna), arg))
+                print(gene_finder(dna))
             else:
-                print 'test', arg
+                print('test', arg)
                 doctest.run_docstring_examples(globals()[arg], globals())
     else:
         doctest.testmod()
