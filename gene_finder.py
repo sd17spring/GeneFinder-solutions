@@ -8,7 +8,8 @@ SoftDes 2016 Mini Project 1: Gene Finder
 
 import random
 from itertools import takewhile
-from amino_acids import aa_table   # you may find these useful
+
+from amino_acids import aa_table  # you may find these useful
 from load import load_seq
 
 
@@ -20,14 +21,14 @@ def shuffle_string(s):
 
 # YOU WILL START YOUR IMPLEMENTATION FROM HERE DOWN ###
 
-NUCLEOTIDE_COMPLEMENTS = {}
+START_CODON = 'ATG'
+STOP_CODONS = ['TAG', 'TAA', 'TGA']
+
+# Initialize the dictionary. This is obfuscated hackery for such a short dictionary.
+# `{'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}` would suffice.
+NUCLEOTIDE_COMPLEMENTS = {n1: n2 for i in [-1, 1] for n1, n2 in zip(*['AC', 'TG'][::i])}
 """A dict of {nucleotide: complement}"""
 
-# Initialize the dictionary. This is probably overkill for such a short dictionary:
-# `{'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}` would suffice.
-for n1, n2 in [('A', 'T'), ('C', 'G')]:
-    NUCLEOTIDE_COMPLEMENTS[n1] = n2
-    NUCLEOTIDE_COMPLEMENTS[n2] = n1
 
 def get_complement(nucleotide):
     """ Returns the complementary nucleotide
@@ -57,7 +58,7 @@ def get_reverse_complement(dna):
     >>> get_reverse_complement("CCGCGTTCA")
     'TGAACGCGG'
     """
-    return ''.join(reversed([get_complement(n) for n in dna]))
+    return ''.join(get_complement(n) for n in dna[::-1])
 
 
 def rest_of_ORF(dna):
@@ -75,13 +76,8 @@ def rest_of_ORF(dna):
     >>> rest_of_ORF("ATGAG") # return whole string, even to incomplete codon
     'ATGAG'
     """
-    stop_codons = ['TAG', 'TAA', 'TGA']
-    codons = [dna[i:i + 3] for i in range(0, len(dna), 3)]
-    return ''.join(takewhile(lambda codon: codon not in stop_codons, codons))
-    # equivalent to the last line:
-    #   def isnt_stop_codon(codon):
-    #     return codon not in stop_codons
-    #   return ''.join(takewhile(isnt_stop_codon, codons))
+    codons = (dna[i:i + 3] for i in range(0, len(dna), 3))
+    return ''.join(takewhile(lambda codon: codon not in STOP_CODONS, codons))
 
 
 def find_all_ORFs_oneframe(dna):
@@ -101,11 +97,10 @@ def find_all_ORFs_oneframe(dna):
     >>> find_all_ORFs_oneframe("ATGATGTAGATGAAATAG") # nested
     ['ATGATG', 'ATGAAA']
     """
-    start_codon = 'ATG'
     frames = []
     i = 0
-    while i < len(dna):
-        if dna[i:i + 3] == start_codon:
+    while i + 2 < len(dna):
+        if dna[i:i + 3] == START_CODON:
             frame = rest_of_ORF(dna[i:])
             frames.append(frame)
             i += len(frame)
@@ -129,7 +124,7 @@ def find_all_ORFs(dna):
     >>> find_all_ORFs("ATGCA")
     ['ATGCA']
     """
-    return [orf for i in xrange(3) for orf in find_all_ORFs_oneframe(dna[i:])]
+    return [orf for i in range(3) for orf in find_all_ORFs_oneframe(dna[i:])]
 
 
 def find_all_ORFs_both_strands(dna):
@@ -156,10 +151,7 @@ def longest_ORF(dna):
     'ATGCTACATTCGCAT'
     """
     orfs = find_all_ORFs_both_strands(dna)
-    if orfs:
-        return max(orfs, key=len)
-    else:
-        return None
+    return max(orfs, key=len) if orfs else None
 
 
 def longest_ORF_noncoding(dna, num_trials):
@@ -172,7 +164,7 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-    return max(len(longest_ORF(shuffle_string(dna)) or '') for _ in xrange(num_trials))
+    return max(len(longest_ORF(shuffle_string(dna)) or '') for _ in range(num_trials))
 
 
 def coding_strand_to_AA(dna):
@@ -189,7 +181,7 @@ def coding_strand_to_AA(dna):
         >>> coding_strand_to_AA("ATGCCCGCTTT")
         'MPA'
     """
-    return ''.join(aa_table[dna[i:i + 3]] for i in xrange(0, len(dna) - 2, 3))
+    return ''.join(aa_table[dna[i:i + 3]] for i in range(0, len(dna) - 2, 3))
 
 
 def gene_finder(dna):
@@ -203,6 +195,7 @@ def gene_finder(dna):
             for orf in find_all_ORFs_both_strands(dna)
             if len(orf) > threshold]
 
+
 if __name__ == "__main__":
     import sys
     import doctest
@@ -211,10 +204,10 @@ if __name__ == "__main__":
         for arg in sys.argv[1:]:
             if arg.endswith('.fa'):
                 dna = load_seq(arg)
-                print 'Finding genes in {}-nucleotide strand in file {}...'.format(len(dna), arg)
-                print gene_finder(dna)
+                print('Finding genes in {}-nucleotide strand in file {}...'.format(len(dna), arg))
+                print(gene_finder(dna))
             else:
-                print 'test', arg
+                print('test', arg)
                 doctest.run_docstring_examples(globals()[arg], globals())
     else:
         doctest.testmod()
