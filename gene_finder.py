@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-SoftDes 2016 Mini Project 1: Gene Finder
+SoftDes 2017 Mini Project 1: Gene Finder
 
 @author: Oliver Steele
 
